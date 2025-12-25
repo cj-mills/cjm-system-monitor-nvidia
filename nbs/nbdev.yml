@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "cjm-system-monitor-nvidia"
+  site-url: "https://cj-mills.github.io/cjm-system-monitor-nvidia"
+  description: "An NVIDIA GPU monitoring plugin for the cjm-plugin-system that provides real-time hardware telemetry via nvitop."
+  repo-branch: main
+  repo-url: "https://github.com/cj-mills/cjm-system-monitor-nvidia"
