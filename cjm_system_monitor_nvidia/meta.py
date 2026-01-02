@@ -16,6 +16,8 @@ def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest gen
         "name": "cjm-system-monitor-nvidia",
         "version": "1.0.0",
         "type": "infrastructure",
+        "category": "system_monitor",
+        "interface": "cjm_infra_plugin_system.plugin_interface.MonitorPlugin",
         
         "module": "cjm_system_monitor_nvidia.plugin",
         "class": "NvidiaMonitorPlugin",
