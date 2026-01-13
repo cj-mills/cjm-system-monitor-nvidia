@@ -53,8 +53,15 @@ from cjm_system_monitor_nvidia.meta import (
 ``` python
 def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest generation
     """Return metadata required to register this plugin with the PluginManager."""
-    return {
-        "name": "cjm-system-monitor-nvidia",
+    # Fallback base path (current behavior for backward compatibility)
+    base_path = os.path.dirname(os.path.dirname(sys.executable))
+    
+    # Use CJM config if available, else fallback to env-relative paths
+    cjm_data_dir = os.environ.get("CJM_DATA_DIR")
+    
+    # Plugin data directory
+    plugin_name = "cjm-system-monitor-nvidia"
+    if cjm_data_dir
     "Return metadata required to register this plugin with the PluginManager."
 ```
 

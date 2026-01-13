@@ -6,14 +6,33 @@
 __all__ = ['get_plugin_metadata']
 
 # %% ../nbs/meta.ipynb 2
+import os
 import sys
 from typing import Dict, Any
 
 # %% ../nbs/meta.ipynb 4
 def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest generation
     """Return metadata required to register this plugin with the PluginManager."""
+    # Fallback base path (current behavior for backward compatibility)
+    base_path = os.path.dirname(os.path.dirname(sys.executable))
+    
+    # Use CJM config if available, else fallback to env-relative paths
+    cjm_data_dir = os.environ.get("CJM_DATA_DIR")
+    
+    # Plugin data directory
+    plugin_name = "cjm-system-monitor-nvidia"
+    if cjm_data_dir:
+        data_dir = os.path.join(cjm_data_dir, plugin_name)
+    else:
+        data_dir = os.path.join(base_path, "data")
+    
+    db_path = os.path.join(data_dir, "nvidia_sysmon.db")
+    
+    # Ensure data directory exists
+    os.makedirs(data_dir, exist_ok=True)
+    
     return {
-        "name": "cjm-system-monitor-nvidia",
+        "name": plugin_name,
         "version": "1.0.0",
         "type": "infrastructure",
         "category": "system_monitor",
@@ -24,6 +43,8 @@ def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest gen
         
         # Absolute path to this environment's Python interpreter
         "python_path": sys.executable,
+
+        "db_path": db_path,
         
         # This plugin monitors GPUs but doesn't require GPU resources itself
         "resources": {
