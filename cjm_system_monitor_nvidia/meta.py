@@ -9,6 +9,7 @@ __all__ = ['get_plugin_metadata']
 import os
 import sys
 from typing import Dict, Any
+from . import __version__
 
 # %% ../nbs/meta.ipynb 4
 def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest generation
@@ -33,7 +34,7 @@ def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest gen
     
     return {
         "name": plugin_name,
-        "version": "1.0.0",
+        "version": __version__,
         "type": "infrastructure",
         "category": "system_monitor",
         "interface": "cjm_infra_plugin_system.plugin_interface.MonitorPlugin",
