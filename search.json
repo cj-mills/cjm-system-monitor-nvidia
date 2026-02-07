@@ -1,0 +1,112 @@
+[
+  {
+    "objectID": "meta.html",
+    "href": "meta.html",
+    "title": "meta",
+    "section": "",
+    "text": "Returns metadata required to register this plugin with the PluginManager. This function is called by cjm-ctl during the manifest generation phase.\nThe returned dictionary includes:\n\npython_path: Absolute path to the environment’s Python interpreter\nmodule/class: Import path for dynamic loading by the Universal Worker\nresources: Hardware requirements (this plugin doesn’t require GPU itself)\n\n\nsource\n\n\n\ndef get_plugin_metadata(\n    \n)-&gt;Dict: # Plugin metadata for manifest generation\n\nReturn metadata required to register this plugin with the PluginManager.",
+    "crumbs": [
+      "meta"
+    ]
+  },
+  {
+    "objectID": "meta.html#get_plugin_metadata",
+    "href": "meta.html#get_plugin_metadata",
+    "title": "meta",
+    "section": "",
+    "text": "Returns metadata required to register this plugin with the PluginManager. This function is called by cjm-ctl during the manifest generation phase.\nThe returned dictionary includes:\n\npython_path: Absolute path to the environment’s Python interpreter\nmodule/class: Import path for dynamic loading by the Universal Worker\nresources: Hardware requirements (this plugin doesn’t require GPU itself)\n\n\nsource\n\n\n\ndef get_plugin_metadata(\n    \n)-&gt;Dict: # Plugin metadata for manifest generation\n\nReturn metadata required to register this plugin with the PluginManager.",
+    "crumbs": [
+      "meta"
+    ]
+  },
+  {
+    "objectID": "meta.html#testing",
+    "href": "meta.html#testing",
+    "title": "meta",
+    "section": "Testing",
+    "text": "Testing\n\nimport json\n\nmetadata = get_plugin_metadata()\nprint(json.dumps(metadata, indent=2))\n\n{\n  \"name\": \"cjm-system-monitor-nvidia\",\n  \"version\": \"0.0.5\",\n  \"type\": \"infrastructure\",\n  \"category\": \"system_monitor\",\n  \"interface\": \"cjm_infra_plugin_system.plugin_interface.MonitorPlugin\",\n  \"module\": \"cjm_system_monitor_nvidia.plugin\",\n  \"class\": \"NvidiaMonitorPlugin\",\n  \"python_path\": \"/opt/hostedtoolcache/Python/3.12.12/x64/bin/python\",\n  \"db_path\": \"/opt/hostedtoolcache/Python/3.12.12/x64/data/nvidia_sysmon.db\",\n  \"resources\": {\n    \"requires_gpu\": false,\n    \"min_gpu_vram_mb\": 0,\n    \"min_system_ram_mb\": 128\n  },\n  \"env_vars\": {}\n}\n\n\n\nCLI Introspection\nThe cjm-ctl install-all command runs this function inside the plugin’s conda environment:\nconda run -n cjm-sys-mon-nvidia python -c \\\n  'from cjm_system_monitor_nvidia.meta import get_plugin_metadata; \\\n   import json; print(json.dumps(get_plugin_metadata(), indent=2))'\nThe output is written to ~/.cjm/plugins/cjm-system-monitor-nvidia.json.",
+    "crumbs": [
+      "meta"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cjm-system-monitor-nvidia",
+    "section": "",
+    "text": "pip install cjm_system_monitor_nvidia",
+    "crumbs": [
+      "cjm-system-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "cjm-system-monitor-nvidia",
+    "section": "",
+    "text": "pip install cjm_system_monitor_nvidia",
+    "crumbs": [
+      "cjm-system-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "cjm-system-monitor-nvidia",
+    "section": "Project Structure",
+    "text": "Project Structure\nnbs/\n├── meta.ipynb   # Metadata introspection for the NVIDIA monitor plugin used by cjm-ctl to generate the registration manifest\n└── plugin.ipynb # Plugin implementation for NVIDIA GPU monitoring using nvitop\nTotal: 2 notebooks",
+    "crumbs": [
+      "cjm-system-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#module-dependencies",
+    "href": "index.html#module-dependencies",
+    "title": "cjm-system-monitor-nvidia",
+    "section": "Module Dependencies",
+    "text": "Module Dependencies\ngraph LR\n    meta[meta&lt;br/&gt;meta]\n    plugin[plugin&lt;br/&gt;plugin]\n\nNo cross-module dependencies detected.",
+    "crumbs": [
+      "cjm-system-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#cli-reference",
+    "href": "index.html#cli-reference",
+    "title": "cjm-system-monitor-nvidia",
+    "section": "CLI Reference",
+    "text": "CLI Reference\nNo CLI commands found in this project.",
+    "crumbs": [
+      "cjm-system-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#module-overview",
+    "href": "index.html#module-overview",
+    "title": "cjm-system-monitor-nvidia",
+    "section": "Module Overview",
+    "text": "Module Overview\nDetailed documentation for each module in the project:\n\nmeta (meta.ipynb)\n\nMetadata introspection for the NVIDIA monitor plugin used by cjm-ctl to generate the registration manifest\n\n\nImport\nfrom cjm_system_monitor_nvidia.meta import (\n    get_plugin_metadata\n)\n\n\nFunctions\ndef get_plugin_metadata() -&gt; Dict[str, Any]:  # Plugin metadata for manifest generation\n    \"\"\"Return metadata required to register this plugin with the PluginManager.\"\"\"\n    # Fallback base path (current behavior for backward compatibility)\n    base_path = os.path.dirname(os.path.dirname(sys.executable))\n    \n    # Use CJM config if available, else fallback to env-relative paths\n    cjm_data_dir = os.environ.get(\"CJM_DATA_DIR\")\n    \n    # Plugin data directory\n    plugin_name = \"cjm-system-monitor-nvidia\"\n    if cjm_data_dir\n    \"Return metadata required to register this plugin with the PluginManager.\"\n\n\n\nplugin (plugin.ipynb)\n\nPlugin implementation for NVIDIA GPU monitoring using nvitop\n\n\nImport\nfrom cjm_system_monitor_nvidia.plugin import (\n    NvidiaMonitorPlugin\n)\n\n\nClasses\nclass NvidiaMonitorPlugin:\n    def __init__(self):\n        \"\"\"Initialize the NVIDIA monitor plugin.\"\"\"\n        self.logger = logging.getLogger(f\"{__name__}.{type(self).__name__}\")\n        self.config = {}\n\n    @property\n    def name(self) -&gt; str:  # Plugin identifier\n    \"NVIDIA System Monitor using nvitop.\"\n    \n    def __init__(self):\n            \"\"\"Initialize the NVIDIA monitor plugin.\"\"\"\n            self.logger = logging.getLogger(f\"{__name__}.{type(self).__name__}\")\n            self.config = {}\n    \n        @property\n        def name(self) -&gt; str:  # Plugin identifier\n        \"Initialize the NVIDIA monitor plugin.\"\n    \n    def name(self) -&gt; str:  # Plugin identifier\n            \"\"\"Plugin name.\"\"\"\n            return \"sys-mon-nvidia\"\n        \n        @property\n        def version(self) -&gt; str:  # Plugin version\n        \"Plugin name.\"\n    \n    def version(self) -&gt; str:  # Plugin version\n            \"\"\"Plugin version.\"\"\"\n            return \"1.0.0\"\n    \n        def initialize(\n            self,\n            config: Optional[Dict[str, Any]] = None  # Configuration dictionary\n        ) -&gt; None\n        \"Plugin version.\"\n    \n    def initialize(\n            self,\n            config: Optional[Dict[str, Any]] = None  # Configuration dictionary\n        ) -&gt; None\n        \"Initialize or reconfigure the plugin.\"\n    \n    def get_config_schema(self) -&gt; Dict[str, Any]:  # JSON Schema\n            \"\"\"Return JSON Schema for configuration.\"\"\"\n            return {}  # No config needed for monitoring\n    \n        def get_current_config(self) -&gt; Dict[str, Any]:  # Current config\n        \"Return JSON Schema for configuration.\"\n    \n    def get_current_config(self) -&gt; Dict[str, Any]:  # Current config\n            \"\"\"Return current configuration.\"\"\"\n            return self.config\n    \n        def cleanup(self) -&gt; None\n        \"Return current configuration.\"\n    \n    def cleanup(self) -&gt; None:\n            \"\"\"Clean up resources.\"\"\"\n            pass\n    \n        def _get_gpu_info_internal(self) -&gt; Dict[str, Any]:  # Raw GPU data\n        \"Clean up resources.\"\n    \n    def execute(\n            self,\n            command: str = \"get_system_status\",  # Command to execute\n            **kwargs\n        ) -&gt; Dict[str, Any]:  # SystemStats as dictionary\n        \"Collect stats and return standardized SystemStats dictionary.\"",
+    "crumbs": [
+      "cjm-system-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "plugin.html",
+    "href": "plugin.html",
+    "title": "plugin",
+    "section": "",
+    "text": "NVIDIA GPU monitoring plugin using nvitop library. Provides real-time hardware telemetry for:\n\nGPU Memory: Free, used, and total VRAM across all visible devices\nGPU Utilization: Compute load percentage\nSystem RAM: Via psutil for cross-platform support\nCPU: Overall utilization percentage\n\nFalls back to nvidia-smi if nvitop is not available.\n\nsource\n\n\n\ndef NvidiaMonitorPlugin(\n    \n):\n\nNVIDIA System Monitor using nvitop.\n\n\n\n# Direct usage (for testing)\nplugin = NvidiaMonitorPlugin()\nplugin.initialize()\nstats = plugin.execute()\nprint(f\"GPU Free: {stats['gpu_free_memory_mb']}MB\")\nprint(f\"RAM Available: {stats['memory_available_mb']}MB\")\n\n\n\nfrom cjm_plugin_system.core.manager import PluginManager\nfrom cjm_plugin_system.core.scheduling import SafetyScheduler\n\nmanager = PluginManager(scheduler=SafetyScheduler())\nmanager.load_all()\n\n# Register this plugin as the system monitor\nmanager.register_system_monitor(\"cjm-system-monitor-nvidia\")\n\n# Now scheduling checks will use real GPU stats\nresult = manager.execute_plugin(\"whisper-local\", audio=\"/path/to/audio.wav\")",
+    "crumbs": [
+      "plugin"
+    ]
+  },
+  {
+    "objectID": "plugin.html#nvidiamonitorplugin",
+    "href": "plugin.html#nvidiamonitorplugin",
+    "title": "plugin",
+    "section": "",
+    "text": "NVIDIA GPU monitoring plugin using nvitop library. Provides real-time hardware telemetry for:\n\nGPU Memory: Free, used, and total VRAM across all visible devices\nGPU Utilization: Compute load percentage\nSystem RAM: Via psutil for cross-platform support\nCPU: Overall utilization percentage\n\nFalls back to nvidia-smi if nvitop is not available.\n\nsource\n\n\n\ndef NvidiaMonitorPlugin(\n    \n):\n\nNVIDIA System Monitor using nvitop.\n\n\n\n# Direct usage (for testing)\nplugin = NvidiaMonitorPlugin()\nplugin.initialize()\nstats = plugin.execute()\nprint(f\"GPU Free: {stats['gpu_free_memory_mb']}MB\")\nprint(f\"RAM Available: {stats['memory_available_mb']}MB\")\n\n\n\nfrom cjm_plugin_system.core.manager import PluginManager\nfrom cjm_plugin_system.core.scheduling import SafetyScheduler\n\nmanager = PluginManager(scheduler=SafetyScheduler())\nmanager.load_all()\n\n# Register this plugin as the system monitor\nmanager.register_system_monitor(\"cjm-system-monitor-nvidia\")\n\n# Now scheduling checks will use real GPU stats\nresult = manager.execute_plugin(\"whisper-local\", audio=\"/path/to/audio.wav\")",
+    "crumbs": [
+      "plugin"
+    ]
+  }
+]
