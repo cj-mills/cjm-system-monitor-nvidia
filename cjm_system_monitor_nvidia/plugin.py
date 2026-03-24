@@ -85,6 +85,20 @@ class NvidiaMonitorPlugin(MonitorPlugin):
                         'memory_free': mem_free // (1024**2),
                         'utilization': device.gpu_utilization() if device.gpu_utilization() != NA else 0
                     }
+
+                    # Per-process GPU memory
+                    try:
+                        for proc in device.processes().values():
+                            proc_gpu_mem = proc.gpu_memory()
+                            gpu_info['processes'].append({
+                                'pid': proc.pid,
+                                'gpu_index': i,
+                                'gpu_memory_mb': proc_gpu_mem // (1024**2) if proc_gpu_mem != NA else 0,
+                                'command': proc.command()[:120] if hasattr(proc, 'command') else '',
+                            })
+                    except Exception:
+                        pass  # Process may have exited during enumeration
+
         except ImportError:
             # nvitop not available, fallback to nvidia-smi
             try:
@@ -107,6 +121,27 @@ class NvidiaMonitorPlugin(MonitorPlugin):
                                 'memory_free': int(float(parts[3])) if parts[3] and parts[3] != 'N/A' else 0,
                                 'utilization': int(float(parts[4])) if parts[4] and parts[4] != 'N/A' else 0,
                             }
+
+                # Per-process GPU memory via nvidia-smi
+                try:
+                    proc_result = subprocess.run(
+                        ['nvidia-smi', '--query-compute-apps=pid,gpu_bus_id,used_memory',
+                         '--format=csv,noheader,nounits'],
+                        capture_output=True, text=True, timeout=2
+                    )
+                    if proc_result.returncode == 0 and proc_result.stdout.strip():
+                        for line in proc_result.stdout.strip().split('\n'):
+                            parts = [p.strip() for p in line.split(',')]
+                            if len(parts) >= 3 and parts[0].isdigit():
+                                gpu_info['processes'].append({
+                                    'pid': int(parts[0]),
+                                    'gpu_index': 0,  # Simplified; bus_id could map to index
+                                    'gpu_memory_mb': int(float(parts[2])) if parts[2] and parts[2] != 'N/A' else 0,
+                                    'command': '',
+                                })
+                except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+                    pass
+
             except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
                 pass
         except Exception as e:
