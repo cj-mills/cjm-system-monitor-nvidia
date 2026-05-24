@@ -10,6 +10,7 @@ __all__ = ['NvidiaMonitorPlugin']
 # %% ../nbs/plugin.ipynb #44b21fb4
 import logging
 import psutil
+from cjm_plugin_system.core.errors import PluginInputError
 import subprocess
 from typing import Any, Dict, Optional
 
@@ -158,7 +159,9 @@ class NvidiaMonitorPlugin(MonitorPlugin):
     ) -> Dict[str, Any]:  # SystemStats as dictionary
         """Collect stats and return standardized SystemStats dictionary."""
         if command != "get_system_status":
-            raise ValueError(f"Unknown command: {command}")
+            raise PluginInputError(  # SG-47: typed input-validation
+            f"Unknown command: {command}", fields_invalid=["command"],
+        )
         
         # 1. Get Host CPU/RAM (psutil)
         vm = psutil.virtual_memory()
