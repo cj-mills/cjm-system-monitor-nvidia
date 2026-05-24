@@ -12,7 +12,7 @@ license = {text = "Apache-2.0"}
 authors = [{name = "Christian J. Mills", email = "9126128+cj-mills@users.noreply.github.com"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
 classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
-dependencies = ['cjm_plugin_system>=0.0.30', 'cjm_infra_plugin_system>=0.0.3', 'nvitop']
+dependencies = ['cjm_plugin_system>=0.0.31', 'cjm_infra_plugin_system>=0.0.4', 'nvitop']
 
 [project.urls]
 Repository = "https://github.com/cj-mills/cjm-system-monitor-nvidia"
