@@ -10,12 +10,11 @@ __all__ = ['NvidiaMonitorPlugin']
 # %% ../nbs/plugin.ipynb #44b21fb4
 import logging
 import psutil
-from cjm_plugin_system.core.errors import PluginInputError
 import subprocess
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from cjm_infra_plugin_system.plugin_interface import MonitorPlugin
-from cjm_infra_plugin_system.core import SystemStats
+from cjm_infra_plugin_system.core import SystemStats, ProcessStats
 from cjm_plugin_system.utils.validation import dataclass_to_jsonschema
 
 # %% ../nbs/plugin.ipynb #374d739a
@@ -43,6 +42,10 @@ class NvidiaMonitorPlugin(MonitorPlugin):
     ) -> None:
         """Initialize or reconfigure the plugin."""
         self.config = config or {}
+        # SG-40: prime psutil cpu_percent so the first get_system_status()
+        # returns a real utilization delta, not 0.0 (psutil.cpu_percent()
+        # yields 0.0 on its first per-process invocation).
+        psutil.cpu_percent(interval=None)
         self.logger.info("NvidiaMonitor initialized")
 
     def get_config_schema(self) -> Dict[str, Any]:  # JSON Schema
@@ -152,29 +155,26 @@ class NvidiaMonitorPlugin(MonitorPlugin):
 
         return gpu_info
 
-    def execute(
-        self,
-        command: str = "get_system_status",  # Command to execute
-        **kwargs
-    ) -> Dict[str, Any]:  # SystemStats as dictionary
-        """Collect stats and return standardized SystemStats dictionary."""
-        if command != "get_system_status":
-            raise PluginInputError(  # SG-47: typed input-validation
-            f"Unknown command: {command}", fields_invalid=["command"],
-        )
-        
+    def get_system_status(self) -> SystemStats:  # Current system telemetry
+        """Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats (CR-3).
+
+        Per-process GPU usage is exposed via `list_processes()`. The raw GPU dict
+        (which includes a `processes` list) is retained in `SystemStats.details`
+        for the legacy job-monitor consumer until the consumer cascade migrates it
+        to `list_processes()` (then SG-48 drops `details`).
+        """
         # 1. Get Host CPU/RAM (psutil)
         vm = psutil.virtual_memory()
-        
+
         # 2. Get GPU Data
         gpu_raw = self._get_gpu_info_internal()
-        
+
         # 3. Aggregate GPU Stats for the Scheduler
         total_vram_free = 0
         total_vram_total = 0
         total_vram_used = 0
         max_load = 0
-        
+
         if gpu_raw['available']:
             for key, det in gpu_raw['details'].items():
                 total_vram_free += det.get('memory_free', 0)
@@ -182,8 +182,8 @@ class NvidiaMonitorPlugin(MonitorPlugin):
                 total_vram_used += det.get('memory_used', 0)
                 max_load = max(max_load, det.get('utilization', 0))
 
-        # 4. Return Standardized Object as dict
-        stats = SystemStats(
+        # 4. Return Standardized Object
+        return SystemStats(
             cpu_percent=psutil.cpu_percent(),
             memory_used_mb=vm.used / (1024**2),
             memory_total_mb=vm.total / (1024**2),
@@ -195,4 +195,22 @@ class NvidiaMonitorPlugin(MonitorPlugin):
             gpu_load_percent=float(max_load),
             details=gpu_raw
         )
-        return stats.to_dict()
+
+    def list_processes(self) -> List[ProcessStats]:  # Per-process GPU usage
+        """Per-process GPU memory usage as typed ProcessStats (CR-3).
+
+        Sources the same nvitop/nvidia-smi enumeration that populates
+        `get_system_status`'s `details['processes']`; returns `[]` when there is
+        no GPU or no per-process attribution available.
+        """
+        gpu_raw = self._get_gpu_info_internal()
+        return [
+            ProcessStats(
+                pid=int(p.get('pid', 0)),
+                gpu_index=int(p.get('gpu_index', -1)),
+                gpu_memory_mb=float(p.get('gpu_memory_mb', 0.0)),
+                command=p.get('command', ''),
+            )
+            for p in gpu_raw.get('processes', [])
+        ]
+

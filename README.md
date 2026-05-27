@@ -21,8 +21,8 @@ Total: 2 notebooks
 
 ``` mermaid
 graph LR
-    meta[meta<br/>meta]
-    plugin[plugin<br/>plugin]
+    meta["meta<br/>meta"]
+    plugin["plugin<br/>plugin"]
 ```
 
 No cross-module dependencies detected.
@@ -144,10 +144,18 @@ class NvidiaMonitorPlugin:
         def _get_gpu_info_internal(self) -> Dict[str, Any]:  # Raw GPU data
         "Clean up resources."
     
-    def execute(
-            self,
-            command: str = "get_system_status",  # Command to execute
-            **kwargs
-        ) -> Dict[str, Any]:  # SystemStats as dictionary
-        "Collect stats and return standardized SystemStats dictionary."
+    def get_system_status(self) -> SystemStats:  # Current system telemetry
+        "Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats (CR-3).
+
+Per-process GPU usage is exposed via `list_processes()`. The raw GPU dict
+(which includes a `processes` list) is retained in `SystemStats.details`
+for the legacy job-monitor consumer until the consumer cascade migrates it
+to `list_processes()` (then SG-48 drops `details`)."
+    
+    def list_processes(self) -> List[ProcessStats]:  # Per-process GPU usage
+        "Per-process GPU memory usage as typed ProcessStats (CR-3).
+
+Sources the same nvitop/nvidia-smi enumeration that populates
+`get_system_status`'s `details['processes']`; returns `[]` when there is
+no GPU or no per-process attribution available."
 ```
