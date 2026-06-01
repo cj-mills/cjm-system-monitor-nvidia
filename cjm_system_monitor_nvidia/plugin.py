@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Optional
 from cjm_infra_plugin_system.plugin_interface import MonitorPlugin
 from cjm_infra_plugin_system.core import SystemStats, ProcessStats
 from cjm_plugin_system.utils.validation import dataclass_to_jsonschema
+from .meta import get_plugin_metadata
 
 # %% ../nbs/plugin.ipynb #374d739a
 class NvidiaMonitorPlugin(MonitorPlugin):
@@ -29,12 +30,12 @@ class NvidiaMonitorPlugin(MonitorPlugin):
     @property
     def name(self) -> str:  # Plugin identifier
         """Plugin name."""
-        return "sys-mon-nvidia"
+        return get_plugin_metadata()["name"]
     
     @property
     def version(self) -> str:  # Plugin version
         """Plugin version."""
-        return "1.0.0"
+        return get_plugin_metadata()["version"]
 
     def initialize(
         self,
@@ -56,9 +57,7 @@ class NvidiaMonitorPlugin(MonitorPlugin):
         """Return current configuration."""
         return self.config
 
-    def cleanup(self) -> None:
-        """Clean up resources."""
-        pass
+
 
     def _get_gpu_info_internal(self) -> Dict[str, Any]:  # Raw GPU data
         """Check for GPU availability and get info using nvitop."""
