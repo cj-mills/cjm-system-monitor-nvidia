@@ -57,11 +57,11 @@ def get_plugin_metadata() -> Dict[str, Any]:  # Plugin metadata for manifest gen
     base_path = os.path.dirname(os.path.dirname(sys.executable))
     
     # Use CJM config if available, else fallback to env-relative paths
-    cjm_data_dir = os.environ.get("CJM_DATA_DIR")
+    cjm_plugin_data_dir = os.environ.get("CJM_PLUGIN_DATA_DIR")
     
     # Plugin data directory
     plugin_name = "cjm-system-monitor-nvidia"
-    if cjm_data_dir
+    if cjm_plugin_data_dir
     "Return metadata required to register this plugin with the PluginManager."
 ```
 
@@ -87,8 +87,8 @@ class NvidiaMonitorPlugin:
         self.config = {}
 
     @property
-    def name(self) -> str:  # Plugin identifier
-    "NVIDIA System Monitor using nvitop."
+    def name(self) -> str:  # Tool identity, derived from the installed distribution (PILLAR 1c)
+    "NVIDIA System Monitor using nvitop (a pure-telemetry ToolCapability)."
     
     def __init__(self):
             """Initialize the NVIDIA monitor plugin."""
@@ -96,26 +96,32 @@ class NvidiaMonitorPlugin:
             self.config = {}
     
         @property
-        def name(self) -> str:  # Plugin identifier
+        def name(self) -> str:  # Tool identity, derived from the installed distribution (PILLAR 1c)
         "Initialize the NVIDIA monitor plugin."
     
-    def name(self) -> str:  # Plugin identifier
-            """Plugin name."""
-            return "sys-mon-nvidia"
-        
-        @property
-        def version(self) -> str:  # Plugin version
-        "Plugin name."
+    def name(self) -> str:  # Tool identity, derived from the installed distribution (PILLAR 1c)
+            """Get the tool name (the installed distribution name)."""
+            from importlib.metadata import metadata, packages_distributions
+            # `__package__` is None in a notebook/__main__ context, so guard the
+            # derivation with the known package module name.
+            pkg = __package__ or "cjm_system_monitor_nvidia"
+            dist = (packages_distributions().get(pkg) or [pkg.replace("_", "-")])[0]
+            return metadata(dist)["Name"]
     
-    def version(self) -> str:  # Plugin version
-            """Plugin version."""
-            return "1.0.0"
+        @property
+        def version(self) -> str:  # Tool version
+        "Get the tool name (the installed distribution name)."
+    
+    def version(self) -> str:  # Tool version
+            """Get the tool version string."""
+            from cjm_system_monitor_nvidia import __version__
+            return __version__
     
         def initialize(
             self,
             config: Optional[Dict[str, Any]] = None  # Configuration dictionary
         ) -> None
-        "Plugin version."
+        "Get the tool version string."
     
     def initialize(
             self,
@@ -134,28 +140,42 @@ class NvidiaMonitorPlugin:
             """Return current configuration."""
             return self.config
     
-        def cleanup(self) -> None
-        "Return current configuration."
     
-    def cleanup(self) -> None:
-            """Clean up resources."""
-            pass
     
         def _get_gpu_info_internal(self) -> Dict[str, Any]:  # Raw GPU data
-        "Clean up resources."
+        "Return current configuration."
     
     def get_system_status(self) -> SystemStats:  # Current system telemetry
-        "Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats (CR-3).
+            """Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats.
+    
+            Per-process GPU usage is exposed separately via `list_processes()`. This
+            is the native-dispatch surface the substrate's `_get_global_stats` calls
+            for resource-derived admission (`MonitorToolProtocol`).
+            """
+            # 1. Get Host CPU/RAM (psutil)
+            vm = psutil.virtual_memory()
+    
+            # 2. Get GPU Data
+            gpu_raw = self._get_gpu_info_internal()
+    
+            # 3. Aggregate GPU Stats for the Scheduler
+            total_vram_free = 0
+            total_vram_total = 0
+            total_vram_used = 0
+            max_load = 0
+    
+            if gpu_raw['available']
+        "Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats.
 
-Per-process GPU usage is exposed via `list_processes()`. The raw GPU dict
-(which includes a `processes` list) is retained in `SystemStats.details`
-for the legacy job-monitor consumer until the consumer cascade migrates it
-to `list_processes()` (then SG-48 drops `details`)."
+Per-process GPU usage is exposed separately via `list_processes()`. This
+is the native-dispatch surface the substrate's `_get_global_stats` calls
+for resource-derived admission (`MonitorToolProtocol`)."
     
     def list_processes(self) -> List[ProcessStats]:  # Per-process GPU usage
-        "Per-process GPU memory usage as typed ProcessStats (CR-3).
+        "Per-process GPU memory usage as typed ProcessStats.
 
-Sources the same nvitop/nvidia-smi enumeration that populates
-`get_system_status`'s `details['processes']`; returns `[]` when there is
-no GPU or no per-process attribution available."
+Sources the same nvitop/nvidia-smi enumeration `get_system_status` uses;
+returns `[]` when there is no GPU or no per-process attribution available.
+The substrate's GPU subtree attribution intersects these PIDs with the
+worker's process tree (`attribute_gpu_to_worker_subtree`)."
 ```
