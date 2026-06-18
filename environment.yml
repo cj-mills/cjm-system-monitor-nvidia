@@ -7,8 +7,12 @@ dependencies:
   - pip
   - pip:
     - nvitop
-    - cjm-plugin-system
-    - cjm-infra-plugin-system
+    # Stage 8 (Option C): the substrate is AUTO-INJECTED by install-all (schema
+    # v2), so cjm-plugin-system is no longer listed here. The monitor depends
+    # only on the telemetry data nouns (cjm-capability-primitives), not the
+    # dissolved cjm-infra-plugin-system domain interface lib.
+    - cjm-capability-primitives
+    # Worker dependencies
     - fastapi
     - uvicorn
     - psutil

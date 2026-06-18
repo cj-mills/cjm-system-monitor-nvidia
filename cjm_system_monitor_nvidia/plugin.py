@@ -13,29 +13,41 @@ import psutil
 import subprocess
 from typing import Any, Dict, List, Optional
 
-from cjm_infra_plugin_system.plugin_interface import MonitorPlugin
-from cjm_infra_plugin_system.core import SystemStats, ProcessStats
-from cjm_plugin_system.utils.validation import dataclass_to_jsonschema
-from .meta import get_plugin_metadata
+# Stage 8 (Option C / PILLAR 1c): the monitor re-bases onto ToolCapability. It is
+# consumed through the substrate's NATIVE-DISPATCH channel -- get_system_status
+# feeds resource-derived admission; list_processes feeds GPU subtree attribution
+# -- so there is NO task adapter (live telemetry has no cacheable,
+# content-addressable result). The dissolving cjm-infra-plugin-system
+# (MonitorPlugin ABC + its DTOs) is replaced by ToolCapability + the data nouns
+# in cjm-capability-primitives. get_plugin_metadata is gone -- name/version
+# derive from importlib.metadata; there is no persistence (no db_path).
+from cjm_plugin_system.core.capability import ToolCapability
+from cjm_capability_primitives.monitoring import SystemStats, ProcessStats
 
 # %% ../nbs/plugin.ipynb #374d739a
-class NvidiaMonitorPlugin(MonitorPlugin):
-    """NVIDIA System Monitor using nvitop."""
-    
+class NvidiaMonitorPlugin(ToolCapability):
+    """NVIDIA System Monitor using nvitop (a pure-telemetry ToolCapability)."""
+
     def __init__(self):
         """Initialize the NVIDIA monitor plugin."""
         self.logger = logging.getLogger(f"{__name__}.{type(self).__name__}")
         self.config = {}
 
     @property
-    def name(self) -> str:  # Plugin identifier
-        """Plugin name."""
-        return get_plugin_metadata()["name"]
-    
+    def name(self) -> str:  # Tool identity, derived from the installed distribution (PILLAR 1c)
+        """Get the tool name (the installed distribution name)."""
+        from importlib.metadata import metadata, packages_distributions
+        # `__package__` is None in a notebook/__main__ context, so guard the
+        # derivation with the known package module name.
+        pkg = __package__ or "cjm_system_monitor_nvidia"
+        dist = (packages_distributions().get(pkg) or [pkg.replace("_", "-")])[0]
+        return metadata(dist)["Name"]
+
     @property
-    def version(self) -> str:  # Plugin version
-        """Plugin version."""
-        return get_plugin_metadata()["version"]
+    def version(self) -> str:  # Tool version
+        """Get the tool version string."""
+        from cjm_system_monitor_nvidia import __version__
+        return __version__
 
     def initialize(
         self,
@@ -155,12 +167,11 @@ class NvidiaMonitorPlugin(MonitorPlugin):
         return gpu_info
 
     def get_system_status(self) -> SystemStats:  # Current system telemetry
-        """Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats (CR-3).
+        """Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats.
 
-        Per-process GPU usage is exposed via `list_processes()`. The raw GPU dict
-        (which includes a `processes` list) is retained in `SystemStats.details`
-        for the legacy job-monitor consumer until the consumer cascade migrates it
-        to `list_processes()` (then SG-48 drops `details`).
+        Per-process GPU usage is exposed separately via `list_processes()`. This
+        is the native-dispatch surface the substrate's `_get_global_stats` calls
+        for resource-derived admission (`MonitorToolProtocol`).
         """
         # 1. Get Host CPU/RAM (psutil)
         vm = psutil.virtual_memory()
@@ -192,15 +203,15 @@ class NvidiaMonitorPlugin(MonitorPlugin):
             gpu_total_memory_mb=float(total_vram_total),
             gpu_used_memory_mb=float(total_vram_used),
             gpu_load_percent=float(max_load),
-            details=gpu_raw
         )
 
     def list_processes(self) -> List[ProcessStats]:  # Per-process GPU usage
-        """Per-process GPU memory usage as typed ProcessStats (CR-3).
+        """Per-process GPU memory usage as typed ProcessStats.
 
-        Sources the same nvitop/nvidia-smi enumeration that populates
-        `get_system_status`'s `details['processes']`; returns `[]` when there is
-        no GPU or no per-process attribution available.
+        Sources the same nvitop/nvidia-smi enumeration `get_system_status` uses;
+        returns `[]` when there is no GPU or no per-process attribution available.
+        The substrate's GPU subtree attribution intersects these PIDs with the
+        worker's process tree (`attribute_gpu_to_worker_subtree`).
         """
         gpu_raw = self._get_gpu_info_internal()
         return [
@@ -212,4 +223,3 @@ class NvidiaMonitorPlugin(MonitorPlugin):
             )
             for p in gpu_raw.get('processes', [])
         ]
-
