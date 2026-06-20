@@ -3,28 +3,28 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cjm-system-monitor-nvidia"
+name = "cjm-capability-monitor-nvidia"
 dynamic = ["version"]
-description = "An NVIDIA GPU monitoring plugin for the cjm-plugin-system that provides real-time hardware telemetry via nvitop."
+description = "An NVIDIA GPU monitoring capability for the cjm-substrate runtime that provides real-time hardware telemetry via nvitop."
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "Apache-2.0"}
 authors = [{name = "Christian J. Mills", email = "9126128+cj-mills@users.noreply.github.com"}]
 keywords = ['nbdev', 'jupyter', 'notebook', 'python']
 classifiers = ["Natural Language :: English", "Intended Audience :: Developers", "Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Programming Language :: Python :: 3 :: Only"]
-dependencies = ['cjm_plugin_system>=0.0.46', 'cjm_capability_primitives>=0.0.8', 'nvitop', 'psutil']
+dependencies = ['cjm-substrate>=0.0.50', 'cjm-capability-primitives>=0.0.9', 'nvitop', 'psutil']
 
 [project.urls]
-Repository = "https://github.com/cj-mills/cjm-system-monitor-nvidia"
-Documentation = "https://cj-mills.github.io/cjm-system-monitor-nvidia"
+Repository = "https://github.com/cj-mills/cjm-capability-monitor-nvidia"
+Documentation = "https://cj-mills.github.io/cjm-capability-monitor-nvidia"
 
 [project.entry-points.nbdev]
-cjm_system_monitor_nvidia = "cjm_system_monitor_nvidia._modidx:d"
+cjm_capability_monitor_nvidia = "cjm_capability_monitor_nvidia._modidx:d"
 
 [tool.setuptools.dynamic]
-version = {attr = "cjm_system_monitor_nvidia.__version__"}
+version = {attr = "cjm_capability_monitor_nvidia.__version__"}
 
 [tool.setuptools.packages.find]
-include = ["cjm_system_monitor_nvidia*"]
+include = ["cjm_capability_monitor_nvidia*"]
 
 [tool.nbdev]

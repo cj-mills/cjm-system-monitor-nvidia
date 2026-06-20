@@ -1,4 +1,4 @@
-name: cjm-sys-mon-nvidia
+name: cjm-capability-monitor-nvidia
 channels:
   - conda-forge
   - defaults
@@ -8,9 +8,9 @@ dependencies:
   - pip:
     - nvitop
     # Stage 8 (Option C): the substrate is AUTO-INJECTED by install-all (schema
-    # v2), so cjm-plugin-system is no longer listed here. The monitor depends
+    # v2), so cjm-substrate is no longer listed here. The monitor depends
     # only on the telemetry data nouns (cjm-capability-primitives), not the
-    # dissolved cjm-infra-plugin-system domain interface lib.
+    # dissolved cjm-infra-capability-system domain interface lib.
     - cjm-capability-primitives
     # Worker dependencies
     - fastapi
