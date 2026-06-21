@@ -1,0 +1,82 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "cjm-capability-monitor-nvidia",
+    "section": "",
+    "text": "pip install cjm_capability_monitor_nvidia",
+    "crumbs": [
+      "cjm-capability-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#install",
+    "href": "index.html#install",
+    "title": "cjm-capability-monitor-nvidia",
+    "section": "",
+    "text": "pip install cjm_capability_monitor_nvidia",
+    "crumbs": [
+      "cjm-capability-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#project-structure",
+    "href": "index.html#project-structure",
+    "title": "cjm-capability-monitor-nvidia",
+    "section": "Project Structure",
+    "text": "Project Structure\nnbs/\n└── capability.ipynb # Capability implementation for NVIDIA GPU monitoring using nvitop\nTotal: 1 notebook",
+    "crumbs": [
+      "cjm-capability-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#module-dependencies",
+    "href": "index.html#module-dependencies",
+    "title": "cjm-capability-monitor-nvidia",
+    "section": "Module Dependencies",
+    "text": "Module Dependencies\ngraph LR\n    capability[\"capability&lt;br/&gt;capability\"]\n\nNo cross-module dependencies detected.",
+    "crumbs": [
+      "cjm-capability-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#cli-reference",
+    "href": "index.html#cli-reference",
+    "title": "cjm-capability-monitor-nvidia",
+    "section": "CLI Reference",
+    "text": "CLI Reference\nNo CLI commands found in this project.",
+    "crumbs": [
+      "cjm-capability-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "index.html#module-overview",
+    "href": "index.html#module-overview",
+    "title": "cjm-capability-monitor-nvidia",
+    "section": "Module Overview",
+    "text": "Module Overview\nDetailed documentation for each module in the project:\n\ncapability (capability.ipynb)\n\nCapability implementation for NVIDIA GPU monitoring using nvitop\n\n\nImport\nfrom cjm_capability_monitor_nvidia.capability import (\n    NvidiaMonitorCapability\n)\n\n\nClasses\nclass NvidiaMonitorCapability:\n    def __init__(self):\n        \"\"\"Initialize the NVIDIA monitor capability.\"\"\"\n        self.logger = logging.getLogger(f\"{__name__}.{type(self).__name__}\")\n        self.config = {}\n\n    @property\n    def name(self) -&gt; str:  # Tool identity, derived from the installed distribution (PILLAR 1c)\n    \"NVIDIA System Monitor using nvitop (a pure-telemetry ToolCapability).\"\n    \n    def __init__(self):\n            \"\"\"Initialize the NVIDIA monitor capability.\"\"\"\n            self.logger = logging.getLogger(f\"{__name__}.{type(self).__name__}\")\n            self.config = {}\n    \n        @property\n        def name(self) -&gt; str:  # Tool identity, derived from the installed distribution (PILLAR 1c)\n        \"Initialize the NVIDIA monitor capability.\"\n    \n    def name(self) -&gt; str:  # Tool identity, derived from the installed distribution (PILLAR 1c)\n            \"\"\"Get the tool name (the installed distribution name).\"\"\"\n            from importlib.metadata import metadata, packages_distributions\n            # `__package__` is None in a notebook/__main__ context, so guard the\n            # derivation with the known package module name.\n            pkg = __package__ or \"cjm_capability_monitor_nvidia\"\n            dist = (packages_distributions().get(pkg) or [pkg.replace(\"_\", \"-\")])[0]\n            return metadata(dist)[\"Name\"]\n    \n        @property\n        def version(self) -&gt; str:  # Tool version\n        \"Get the tool name (the installed distribution name).\"\n    \n    def version(self) -&gt; str:  # Tool version\n            \"\"\"Get the tool version string.\"\"\"\n            from cjm_capability_monitor_nvidia import __version__\n            return __version__\n    \n        def initialize(\n            self,\n            config: Optional[Dict[str, Any]] = None  # Configuration dictionary\n        ) -&gt; None\n        \"Get the tool version string.\"\n    \n    def initialize(\n            self,\n            config: Optional[Dict[str, Any]] = None  # Configuration dictionary\n        ) -&gt; None\n        \"Initialize or reconfigure the capability.\"\n    \n    def get_config_schema(self) -&gt; Dict[str, Any]:  # JSON Schema\n            \"\"\"Return JSON Schema for configuration.\"\"\"\n            return {}  # No config needed for monitoring\n    \n        def get_current_config(self) -&gt; Dict[str, Any]:  # Current config\n        \"Return JSON Schema for configuration.\"\n    \n    def get_current_config(self) -&gt; Dict[str, Any]:  # Current config\n            \"\"\"Return current configuration.\"\"\"\n            return self.config\n    \n    \n    \n        def _get_gpu_info_internal(self) -&gt; Dict[str, Any]:  # Raw GPU data\n        \"Return current configuration.\"\n    \n    def get_system_status(self) -&gt; SystemStats:  # Current system telemetry\n            \"\"\"Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats.\n    \n            Per-process GPU usage is exposed separately via `list_processes()`. This\n            is the native-dispatch surface the substrate's `_get_global_stats` calls\n            for resource-derived admission (`MonitorToolProtocol`).\n            \"\"\"\n            # 1. Get Host CPU/RAM (psutil)\n            vm = psutil.virtual_memory()\n    \n            # 2. Get GPU Data\n            gpu_raw = self._get_gpu_info_internal()\n    \n            # 3. Aggregate GPU Stats for the Scheduler\n            total_vram_free = 0\n            total_vram_total = 0\n            total_vram_used = 0\n            max_load = 0\n    \n            if gpu_raw['available']\n        \"Collect host CPU/RAM + aggregated GPU stats as a typed SystemStats.\n\nPer-process GPU usage is exposed separately via `list_processes()`. This\nis the native-dispatch surface the substrate's `_get_global_stats` calls\nfor resource-derived admission (`MonitorToolProtocol`).\"\n    \n    def list_processes(self) -&gt; List[ProcessStats]:  # Per-process GPU usage\n        \"Per-process GPU memory usage as typed ProcessStats.\n\nSources the same nvitop/nvidia-smi enumeration `get_system_status` uses;\nreturns `[]` when there is no GPU or no per-process attribution available.\nThe substrate's GPU subtree attribution intersects these PIDs with the\nworker's process tree (`attribute_gpu_to_worker_subtree`).\"",
+    "crumbs": [
+      "cjm-capability-monitor-nvidia"
+    ]
+  },
+  {
+    "objectID": "capability.html",
+    "href": "capability.html",
+    "title": "capability",
+    "section": "",
+    "text": "NVIDIA GPU monitoring capability using nvitop library. Provides real-time hardware telemetry for:\n\nGPU Memory: Free, used, and total VRAM across all visible devices\nGPU Utilization: Compute load percentage\nSystem RAM: Via psutil for cross-platform support\nCPU: Overall utilization percentage\n\nFalls back to nvidia-smi if nvitop is not available.\n\n\n\n\ndef NvidiaMonitorCapability(\n    \n):\n\nNVIDIA System Monitor using nvitop (a pure-telemetry ToolCapability).\n\n\n\n# Direct usage (for testing) — the native telemetry surface\ncapability = NvidiaMonitorCapability()\ncapability.initialize()\nstats = capability.get_system_status()          # -&gt; SystemStats\nprint(f\"GPU Free: {stats.gpu_free_memory_mb}MB\")\nprint(f\"RAM Available: {stats.memory_available_mb}MB\")\nfor proc in capability.list_processes():         # -&gt; List[ProcessStats]\n    print(proc.pid, proc.gpu_memory_mb)\n\n\n\nThe monitor is bound as the system monitor by name at startup — the cores pass --sysmon-capability cjm-capability-monitor-nvidia, which becomes sysmon_capability_name on both CapabilityManager and JobQueue (lazily resolved via _resolve_system_monitor). The substrate then consumes it through the native-dispatch channel — there is no task adapter:\n\nCapabilityManager._get_global_stats() calls get_system_status() to feed resource-derived admission.\nJobQueue._sample_resource_snapshot() calls list_processes() for GPU subtree attribution (CR-7 empirical resource keying).",
+    "crumbs": [
+      "capability"
+    ]
+  },
+  {
+    "objectID": "capability.html#nvidiamonitorcapability",
+    "href": "capability.html#nvidiamonitorcapability",
+    "title": "capability",
+    "section": "",
+    "text": "NVIDIA GPU monitoring capability using nvitop library. Provides real-time hardware telemetry for:\n\nGPU Memory: Free, used, and total VRAM across all visible devices\nGPU Utilization: Compute load percentage\nSystem RAM: Via psutil for cross-platform support\nCPU: Overall utilization percentage\n\nFalls back to nvidia-smi if nvitop is not available.\n\n\n\n\ndef NvidiaMonitorCapability(\n    \n):\n\nNVIDIA System Monitor using nvitop (a pure-telemetry ToolCapability).\n\n\n\n# Direct usage (for testing) — the native telemetry surface\ncapability = NvidiaMonitorCapability()\ncapability.initialize()\nstats = capability.get_system_status()          # -&gt; SystemStats\nprint(f\"GPU Free: {stats.gpu_free_memory_mb}MB\")\nprint(f\"RAM Available: {stats.memory_available_mb}MB\")\nfor proc in capability.list_processes():         # -&gt; List[ProcessStats]\n    print(proc.pid, proc.gpu_memory_mb)\n\n\n\nThe monitor is bound as the system monitor by name at startup — the cores pass --sysmon-capability cjm-capability-monitor-nvidia, which becomes sysmon_capability_name on both CapabilityManager and JobQueue (lazily resolved via _resolve_system_monitor). The substrate then consumes it through the native-dispatch channel — there is no task adapter:\n\nCapabilityManager._get_global_stats() calls get_system_status() to feed resource-derived admission.\nJobQueue._sample_resource_snapshot() calls list_processes() for GPU subtree attribution (CR-7 empirical resource keying).",
+    "crumbs": [
+      "capability"
+    ]
+  }
+]
